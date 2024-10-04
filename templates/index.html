@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Challenge</title>
+    <style>
+        /* Общие стили для сайта */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 50px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            font-size: 18px;
+            color: #555;
+        }
+
+        /* Стиль для кнопки */
+        .button {
+            position: absolute;
+            padding: 15px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Рамка для ограничения перемещения кнопки */
+        #gameArea {
+            position: relative;
+            width: 80vw;
+            height: 60vh;
+            border: 3px solid #3498db;
+            margin: 0 auto;
+            overflow: hidden;
+            background-color: white;
+        }
+
+        /* Скрытый элемент для показа завершения игры */
+        #game-over {
+            display: none;
+            font-size: 24px;
+            color: #e74c3c;
+            margin-top: 20px;
+        }
+
+        /* Стиль для кнопки выхода */
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        a:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome, {{ username }}! Click the button 15 times as fast as you can!</h1>
+
+    <!-- Область для игры с рамкой -->
+    <div id="gameArea">
+        <button class="button" id="runawayBtn">Click me!</button>
+    </div>
+
+    <p>Clicks: <span id="clickCount">0</span> / 15</p>
+
+    <form id="resultForm" action="/submit_result" method="POST" style="display: none;">
+        <input type="hidden" name="time_spent" id="timeSpent">
+    </form>
+
+    <p id="game-over">Game over! You've completed the challenge!</p>
+
+    <script>
+        let startTime;
+        let clickCount = 0;
+        const maxClicks = 15;
+        const button = document.getElementById('runawayBtn');
+        const clickCounter = document.getElementById('clickCount');
+        const gameOverText = document.getElementById('game-over');
+        const gameArea = document.getElementById('gameArea');
+
+        // Начинаем отсчет времени при первом клике
+        button.addEventListener('click', function() {
+            if (clickCount === 0) {
+                startTime = Date.now();
+            }
+            clickCount++;
+            clickCounter.innerText = clickCount;
+
+            // Кнопка перемещается в случайное место
+            if (clickCount < maxClicks) {
+                moveButton();
+            } else {
+                finishGame();
+            }
+        });
+
+        // Функция для перемещения кнопки внутри рамки
+        function moveButton() {
+            const x = Math.random() * (gameArea.clientWidth - button.clientWidth);
+            const y = Math.random() * (gameArea.clientHeight - button.clientHeight);
+            button.style.left = `${x}px`;
+            button.style.top = `${y}px`;
+        }
+
+        // Функция для завершения игры и отправки результатов
+        function finishGame() {
+            let endTime = Date.now();
+            let timeSpent = (endTime - startTime) / 1000; // Время в секундах
+            document.getElementById('timeSpent').value = timeSpent;
+            document.getElementById('resultForm').submit();
+
+            // Скрыть кнопку и показать текст завершения
+            button.style.display = 'none';
+            gameOverText.style.display = 'block';
+        }
+
+        // Инициализация первой позиции кнопки
+        moveButton();
+    </script>
+
+    <a href="/logout">Logout</a>
+</body>
+</html>
